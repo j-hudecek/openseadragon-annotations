@@ -11,7 +11,7 @@ export default class Draw {
     this._mouseTracker = function (e) {
       var offsetX = e.clientX - this.rect.left,
 					offsetY = e.clientY - this.rect.top;
-      console.log("mousetracker rect"+this.rect.left+","+this.rect.top+" offset:"+offsetX+","+offsetY);
+      //console.log("mousetracker rect"+this.rect.left+","+this.rect.top+" offset:"+offsetX+","+offsetY);
       this.x = offsetX;
       this.y = offsetY;
     }.bind(this);
