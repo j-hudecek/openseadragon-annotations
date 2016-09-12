@@ -155,7 +155,7 @@ function createPlaceholder(x, y, svg) {
     svg.appendChild(iletter)
 
     var newnote = prompt("Specify note for this location");
-    if (newnote === null) { //user cancelled prompt
+    if (newnote === "" || newnote === null) { 
       circle.remove();
       circle2.remove();
       iletter.remove();
