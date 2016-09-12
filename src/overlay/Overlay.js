@@ -11,14 +11,18 @@ export default class Overlay extends OpenSeadragon.EventSource {
   }
 
   export() {
-    var serializer = new XMLSerializer();
-    var data = serializer.serializeToString(this.svg);
-    return data;
+    return this.svg.innerHTML;
   }
 
   import(data) {
-    this.el.innerHTML = data;
-    this.svg = this.el.firstChild;
+    this.svg.innerHTML = data;
+    var circles = $('svg circle[annotation-type=1]');
+    var circles2 = $('svg circle[annotation-type=2]');
+    var iletters = $('svg path[annotation-type=3]');
+
+    for (var i=0;i<circles.length; i++) {
+      addInteractivity(circles[i], circles2[i], iletters[i])
+    }
   }
 
   reset() {
