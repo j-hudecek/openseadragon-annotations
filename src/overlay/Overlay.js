@@ -127,6 +127,7 @@ function createPlaceholder(x, y, svg) {
     circle.setAttribute('stroke-width', 0.1/viewer.viewport.getZoom());
     circle.setAttribute('opacity', '0.8');
     circle.setAttribute('transform', 'scale('+1/viewer.viewport.getZoom()+')')
+    circle.setAttribute('cursor', 'pointer')
     svg.appendChild(circle);
     var circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle2.setAttribute('cx', x);
@@ -147,6 +148,7 @@ function createPlaceholder(x, y, svg) {
     iletter.setAttribute('d', 'M3 0c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm-1.5 2.5c-.83 0-1.5.67-1.5 1.5h1c0-.28.22-.5.5-.5s.5.22.5.5-1 1.64-1 2.5c0 .86.67 1.5 1.5 1.5s1.5-.67 1.5-1.5h-1c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-.36 1-1.84 1-2.5 0-.81-.67-1.5-1.5-1.5z');
     iletter.setAttribute('opacity', '0.7');
     iletter.setAttribute('transform', 'scale('+1/3/viewer.viewport.getZoom()+') translate('+x+','+y+')');
+    iletter.setAttribute('cursor', 'pointer')
     svg.appendChild(iletter)
 
     var newnote = prompt("Specify note for this location");
