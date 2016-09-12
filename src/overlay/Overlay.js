@@ -162,20 +162,30 @@ function createPlaceholder(x, y, svg) {
       return;
     } 
     circle2.setAttribute('note', newnote)
-    $(circle2).on('mouseenter', function() { this.setAttribute('opacity', "1"); });
-    $(circle2).on('mouseleave', function() { this.setAttribute('opacity', "0.2")});
-    $(circle2).on('mousedown', function(e) { 
-      var newnote = prompt("Specify note for this location, leave it empty to remove the note", this.getAttribute('note'));
-      if (newnote !== null) //user cancelled prompt 
-        this.setAttribute('note', newnote); 
+    addInteractivity(circle, circle2, iletter);
+    return circle2;
+  }
+
+  function addInteractivity(circle, circle2, iletter) {
+    function annoMouseEnter() {
+      circle2.setAttribute('oldopacity', circle2.getAttribute('opacity'));
+      circle2.setAttribute('opacity', "1");
+    }
+    function annoMouseLeave() {
+      circle2.setAttribute('opacity', circle2.getAttribute('oldopacity'));
+    }
+    var els = $([circle, circle2, iletter]);
+    els.on('mouseenter', annoMouseEnter);
+    els.on('mouseleave', annoMouseLeave);
+    els.on('mousedown', function(e) { 
+      var newnote = prompt("Specify note for this location, leave it empty to remove the note", circle2.getAttribute('note'));
+      if (newnote !== null) //user cancelled prompt
+        circle2.setAttribute('note', newnote); 
       if (newnote === "") {
-        var circle2 = $(this).prev();
-        var iletter = $(this).next();
-        this.remove();
         circle2.remove();
+        circle.remove();
         iletter.remove();
       }
       e.stopPropagation(); 
     });
-    return circle2;
   }
