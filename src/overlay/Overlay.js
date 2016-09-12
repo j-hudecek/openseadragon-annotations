@@ -119,6 +119,7 @@ function createPlaceholder(x, y, svg) {
     x = x*viewer.viewport.getZoom();
     y = y*viewer.viewport.getZoom();
     var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('annotation-type', '1');
     circle.setAttribute('cx', x);
     circle.setAttribute('cy', y);
     circle.setAttribute('r', r);
@@ -130,6 +131,7 @@ function createPlaceholder(x, y, svg) {
     circle.setAttribute('cursor', 'pointer')
     svg.appendChild(circle);
     var circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle2.setAttribute('annotation-type', '2');
     circle2.setAttribute('cx', x);
     circle2.setAttribute('cy', y);
     circle2.setAttribute('r', r*0.9);
@@ -143,6 +145,7 @@ function createPlaceholder(x, y, svg) {
     x = x*3;y = y*3; //to counter scale
     x = x-2;y = y-4; //to shift it to the center
     var iletter = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    iletter.setAttribute('annotation-type', '3');
     iletter.setAttribute('stroke', 'white');
     iletter.setAttribute('stroke-width', 0.5);
     iletter.setAttribute('d', 'M3 0c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm-1.5 2.5c-.83 0-1.5.67-1.5 1.5h1c0-.28.22-.5.5-.5s.5.22.5.5-1 1.64-1 2.5c0 .86.67 1.5 1.5 1.5s1.5-.67 1.5-1.5h-1c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-.36 1-1.84 1-2.5 0-.81-.67-1.5-1.5-1.5z');
