@@ -23,6 +23,11 @@ export default class Overlay extends OpenSeadragon.EventSource {
     for (var i=0;i<circles.length; i++) {
       addInteractivity(circles[i], circles2[i], iletters[i])
     }
+    $('svg path').each(function(i,el) {
+      if (this.getAttribute('annotation-type') === null) {
+          this.setAttribute('stroke-width', 0.5/viewer.viewport.getZoom());
+      }
+    })
   }
 
   reset() {
