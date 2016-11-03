@@ -8,6 +8,7 @@ import Measure from './state/Measure';
 import Move from './state/Move';
 import Controls from './controls/Controls';
 import Overlay from './overlay/Overlay';
+import 'babel-polyfill';
 
 export default OpenSeadragon.Viewer.prototype.initializeAnnotations = function (options) {
   var context = new Context();

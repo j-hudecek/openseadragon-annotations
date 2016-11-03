@@ -1,5 +1,5 @@
 module.exports = {
-  entry: "./src/openseadragon-annotations.js",
+  entry: ['babel-polyfill', "./src/openseadragon-annotations.js"],
   output: {
     path: './dist',
     filename: "openseadragon-annotations.js",
