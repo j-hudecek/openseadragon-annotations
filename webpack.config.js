@@ -11,7 +11,8 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.js$/, loader: 'babel', exclude: /node_modules/ },
-      { test: /\.png$/, loader: 'url' }
+      { test: /\.png$/, loader: 'url' },
+      { test: /\.cur$/, loader: 'url?mimetype=image/vnd.microsoft.icon' },
     ]
   },
   devtool: 'source-map'

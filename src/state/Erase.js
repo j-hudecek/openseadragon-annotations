@@ -1,6 +1,6 @@
 import OpenSeadragon from 'OpenSeadragon';
 
-import eraseCursor from '../../img/erase_cursor.png';
+import eraseCursor from '../../img/erase_cursor.cur';
 
 export default class Erase {
 
