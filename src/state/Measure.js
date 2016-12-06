@@ -10,34 +10,29 @@ export default class Measure {
   }
 
   initialize() {
-     $("svg").css("cursor", 'url('+measureCursor+') 7 9, auto')
-    this._mouseTracker = function (e) {
-      var offsetX = e.clientX - this.rect.left,
-					offsetY = e.clientY - this.rect.top;
-      this.x = offsetX;
-      this.y = offsetY;
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
+    $("svg").css("cursor", 'url('+measureCursor+') 7 9, auto')
+    this._pressed = false;
+    this._mouseMove = function (e) {
+      if (!this._pressed)
+          return;
+      //console.log("mousetracker rect"+this.rect.left+","+this.rect.top+" offset:"+offsetX+","+offsetY);
+      this.x = e.position.x;
+      this.y = e.position.y;
     }.bind(this);
     this._onMouseDown = function (e) {
-        this.rect = this.overlay.svg.getBoundingClientRect();
-        var	offsetX = e.clientX - this.rect.left,
-            offsetY = e.clientY - this.rect.top;
-        this.handleMouseDown(offsetX,offsetY);
-        e.stopPropagation();
+      this.handleMouseDown(e.position.x, e.position.y);
+      e.originalEvent.stopPropagation();
     }.bind(this);
     this._onMouseUp = function () {
       this.handleMouseUp();
     }.bind(this);
-    this.overlay.addHandler('mousedown', this._onMouseDown);
-    window.addEventListener('mouseup', this._onMouseUp, false);
+    this._mouseTracker = new OpenSeadragon.MouseTracker({ element: this.overlay.el, pressHandler: this._onMouseDown, releaseHandler: this._onMouseUp, moveHandler: this._mouseMove });
     return this;
   }
 
   close() {
-    this.overlay.removeHandler('mousedown', this._onMouseDown);
-    window.removeEventListener('mouseup', this._onMouseUp, false);
+     this._mouseTracker.setTracking(false);
+     this._mouseTracker.destroy();
   }
 
   handleMouseDown(x, y) {
@@ -46,14 +41,15 @@ export default class Measure {
       this.startY = y;
       this.x = x;
       this.y = y;
+      this._pressed = true;
       this.overlay.startPath(this.x, this.y);
       this.path = this.overlay.svg.lastChild;
       this.overlay.addLabel(this.x, this.y, "0");
       this.label = this.overlay.svg.lastChild;
-      
       this.path.setAttribute('stroke', 'black');
-      this.overlay.el.addEventListener('mousemove', this._mouseTracker, false);
       this._interval = window.setInterval(function () {
+        if (!this._pressed)
+          return;
         this.overlay.updatePathsEnd(this.path, this.x, this.y);
         var dst = this.overlay.distance(this.x, this.y, this.startX, this.startY);
         dst = dst/getCurrentPPM();
@@ -64,10 +60,10 @@ export default class Measure {
   }
 
   handleMouseUp() {
-    this.overlay.el.removeEventListener('mousemove', this._mouseTracker);
+    this._pressed = false;
     this._interval = clearInterval(this._interval);
-    this.path.remove();
-    this.label.remove();
+    this.path.parentNode.removeChild(this.path);
+    this.label.parentNode.removeChild(this.label);
     return this;
   }
 

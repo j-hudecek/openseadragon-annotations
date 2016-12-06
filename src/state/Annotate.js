@@ -10,27 +10,18 @@ export default class Annotate {
   }
 
   initialize() {
-     $("svg").css("cursor", 'auto')
+    $("svg").css("cursor", 'auto');
     this._onMouseDown = function (e) {
-      this.rect = this.overlay.svg.getBoundingClientRect();
-      var offsetX = e.clientX - this.rect.left,
-          offsetY = e.clientY - this.rect.top;
-      this.handleMouseDown(offsetX,offsetY);
-      e.stopPropagation();
+      this.overlay.addPlaceholder(e.position.x, e.position.y)
+      e.originalEvent.stopPropagation();
     }.bind(this);
-    this.overlay.addHandler('mousedown', this._onMouseDown);
+    this._mouseTracker = new OpenSeadragon.MouseTracker({ element: this.overlay.el, pressHandler: this._onMouseDown } );
     return this;
   }
 
   close() {
-    this.overlay.removeHandler('mousedown', this._onMouseDown);
-  }
-
-  handleMouseDown(x, y) {
-    if (!this._interval) {
-       this.overlay.addPlaceholder(x,y)
-    }
-    return this;
+     this._mouseTracker.setTracking(false);
+     this._mouseTracker.destroy();
   }
 }
 

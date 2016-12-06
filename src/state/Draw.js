@@ -8,40 +8,39 @@ export default class Draw {
 
   initialize() {
     $("svg").css("cursor", "auto");
-    this._mouseTracker = function (e) {
-      var offsetX = e.clientX - this.rect.left,
-					offsetY = e.clientY - this.rect.top;
+    this._pressed = false;
+    this._mouseMove = function (e) {
+      if (!this._pressed)
+          return;
       //console.log("mousetracker rect"+this.rect.left+","+this.rect.top+" offset:"+offsetX+","+offsetY);
-      this.x = offsetX;
-      this.y = offsetY;
+      this.x = e.position.x;
+      this.y = e.position.y;
     }.bind(this);
     this._onMouseDown = function (e) {
-			this.rect = this.overlay.svg.getBoundingClientRect();
-			var	offsetX = e.clientX - this.rect.left,
-			    offsetY = e.clientY - this.rect.top;
-      this.handleMouseDown(offsetX,offsetY);
-      e.stopPropagation();
+      this.handleMouseDown(e.position.x, e.position.y);
+      e.originalEvent.stopPropagation();
     }.bind(this);
     this._onMouseUp = function () {
       this.handleMouseUp();
     }.bind(this);
-    this.overlay.addHandler('mousedown', this._onMouseDown);
-    window.addEventListener('mouseup', this._onMouseUp, false);
+    this._mouseTracker = new OpenSeadragon.MouseTracker({ element: this.overlay.el, pressHandler: this._onMouseDown, releaseHandler: this._onMouseUp, moveHandler: this._mouseMove } );
     return this;
   }
 
   close() {
-    this.overlay.removeHandler('mousedown', this._onMouseDown);
-    window.removeEventListener('mouseup', this._onMouseUp, false);
+    this._mouseTracker.setTracking(false);
+    this._mouseTracker.destroy();
   }
 
   handleMouseDown(x, y) {
     if (!this._interval) {
       this.x = x;
       this.y = y;
+      this._pressed = true;
       this.overlay.startPath(this.x, this.y);
-      this.overlay.el.addEventListener('mousemove', this._mouseTracker, false);
       this._interval = window.setInterval(function () {
+        if (!this._pressed)
+          return;
         this.overlay.updatePath(this.x, this.y);
       }.bind(this), 25);
     }
@@ -49,9 +48,8 @@ export default class Draw {
   }
 
   handleMouseUp() {
-    this.overlay.el.removeEventListener('mousemove', this._mouseTracker);
+    this._pressed = false;
     this._interval = clearInterval(this._interval);
     return this;
   }
-
 }

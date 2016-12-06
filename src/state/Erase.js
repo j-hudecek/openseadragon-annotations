@@ -9,17 +9,32 @@ export default class Erase {
   }
 
   erase(x, y) {
-    var clientx = x / this.overlay.svg.clientWidth * 100,
-        clienty = y / this.overlay.svg.clientHeight * 100;
+    var clientx = x / this.overlay.el.clientWidth * 100,
+        clienty = y / this.overlay.el.clientHeight * 100;
     console.log("erase at " + x + "," + y);
     var paths = $(this.overlay.svg).find("path")
     var toremove = [];
     var overlay = this.overlay;
     paths.each(function (i, el) {
         var $el = $(el);
-        var points = $el.attr("d").split(" ");
-        for (var j = 0; j < points.length - 2; j += 4) {
-            var erasedist = 2 / viewer.viewport.getZoom();
+        var pointdefs = $el.attr("d");
+        //IE has space there?
+        pointdefs = pointdefs.replace(/M /g,"M").replace(/L /g,"L"); 
+        var points = pointdefs.split(" ");
+        var erasedist = 1 / viewer.viewport.getZoom();
+        for (var j = 0; j < points.length - 2; j += 2) {
+            var point1x = points[j].substr(1),
+                point1y = points[j + 1];
+            var distto1 = overlay.distance(point1x, point1y, clientx, clienty);
+            if (distto1  < erasedist) {
+                //check if it's close to any inflection points
+                //console.log("connection erasing at " + clientx + ", " + clienty);
+                toremove.push(el);
+                return;
+            }
+        }
+        
+        for (var j = 0; j < points.length - 3; j += 4) {
             var point1x = points[j].substr(1),
                 point1y = points[j + 1];
             var point2x = points[j + 2].substr(1),
@@ -39,52 +54,50 @@ export default class Erase {
     //DEBUG - show erasure circle
     // var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     // var radius = 1 / viewer.viewport.getZoom();
-    // dot.setAttribute('cx', clientx-radius/2);
+    // dot.setAttribute('cx', clientx);
     // dot.setAttribute('stroke', 'black');
     // dot.setAttribute('r', radius);
-    // dot.setAttribute('cy', clienty - radius / 2);
+    // dot.setAttribute('cy', clienty);
     // this.overlay.svg.appendChild(dot)
     // DEBUG - color lines to be deleted
-    //$(toremove).each(function (i, el) { el.setAttribute("stroke", "green"); });
+    //    $(toremove).each(function (i, el) { el.setAttribute("stroke", "green"); });
   }
 
   initialize() {
     console.log("erase")
     $("svg").css("cursor", 'url('+eraseCursor+') 13 9, auto')
-    this._mouseTracker = function (e) {
-      var offsetX = e.clientX - this.rect.left,
-					offsetY = e.clientY - this.rect.top;
-      //console.log("mousetracker rect"+this.rect.left+","+this.rect.top+" offset:"+offsetX+","+offsetY);
-      this.x = offsetX;
-      this.y = offsetY;
+    this._pressed = false;
+    this._mouseMove = function (e) {
+      if (!this._pressed)
+        return;
+      this.x = e.position.x;
+      this.y = e.position.y;
     }.bind(this);
     this._onMouseDown = function (e) {
-		this.rect = this.overlay.svg.getBoundingClientRect();
-		var	offsetX = e.clientX - this.rect.left,
-		    offsetY = e.clientY - this.rect.top;
-        this.handleMouseDown(offsetX, offsetY);
-        e.stopPropagation();
+      this.handleMouseDown(e.position.x, e.position.y);
+      e.originalEvent.stopPropagation();
     }.bind(this);
     this._onMouseUp = function () {
       this.handleMouseUp();
     }.bind(this);
-    this.overlay.addHandler('mousedown', this._onMouseDown);
-    window.addEventListener('mouseup', this._onMouseUp, false);
+    this._mouseTracker = new OpenSeadragon.MouseTracker({ element: this.overlay.el, pressHandler: this._onMouseDown, releaseHandler: this._onMouseUp, moveHandler: this._mouseMove } );
     return this;
   }
 
   close() {
-    this.overlay.removeHandler('mousedown', this._onMouseDown);
-    window.removeEventListener('mouseup', this._onMouseUp, false);
+    this._mouseTracker.setTracking(false);
+    this._mouseTracker.destroy();
   }
 
   handleMouseDown(x, y) {
     if (!this._interval) {
       this.x = x;
       this.y = y;
+      this._pressed = true;
       this.erase(x, y); 
-      this.overlay.el.addEventListener('mousemove', this._mouseTracker, false);
       this._interval = window.setInterval(function () {
+        if (!this._pressed)
+          return;
         this.erase(this.x, this.y); 
       }.bind(this), 25);
     }
@@ -92,7 +105,7 @@ export default class Erase {
   }
 
   handleMouseUp() {
-    this.overlay.el.removeEventListener('mousemove', this._mouseTracker);
+    this._pressed = false;
     this._interval = clearInterval(this._interval);
     return this;
   }
