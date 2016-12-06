@@ -17,10 +17,7 @@ export default class Erase {
     var overlay = this.overlay;
     paths.each(function (i, el) {
         var $el = $(el);
-        var pointdefs = $el.attr("d");
-        //IE has space there?
-        pointdefs = pointdefs.replace(/M /g,"M").replace(/L /g,"L"); 
-        var points = pointdefs.split(" ");
+        var points = overlay.getPathPoints($el.attr("d"))
         var erasedist = 1 / viewer.viewport.getZoom();
         for (var j = 0; j < points.length - 2; j += 2) {
             var point1x = points[j].substr(1),

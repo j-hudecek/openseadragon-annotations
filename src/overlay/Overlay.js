@@ -44,14 +44,20 @@ export default class Overlay extends OpenSeadragon.EventSource {
     var x = x / this.el.clientWidth * 100;
     var y = y / this.el.clientHeight * 100;
     var path = this.svg.lastChild;
-    path.setAttribute('d', path.getAttribute('d') + ' L' + x + ' ' + y);
+    path.setAttribute('d', path.getAttribute('d') + ' L ' + x + ' ' + y);
   }
 
   updatePathsEnd(path, x, y) {
-    var coords = path.getAttribute('d').split(' ');
+    var coords = this.getPathPoints(path.getAttribute('d'));
     var x = x / this.el.clientWidth * 100;
     var y = y / this.el.clientHeight * 100;
-    path.setAttribute('d', coords[0]+' '+coords[1]+' L'+ x + ' ' + y);
+    path.setAttribute('d', coords[0].replace('M','M ')+' '+coords[1]+' L '+ x + ' ' + y);
+  }
+
+  getPathPoints(d) {
+      //IE has space there?
+      d = d.replace(/M /g,"M").replace(/L /g,"L"); 
+      return d.split(" ");
   }
 
  addLabel(x, y, text) {
@@ -91,7 +97,7 @@ function createPath(x, y) {
   path.setAttribute('stroke-width', 0.5/viewer.viewport.getZoom());
   path.setAttribute('stroke-linejoin', 'round');
   path.setAttribute('stroke-linecap', 'round');
-  path.setAttribute('d', 'M' + x + ' ' + y);
+  path.setAttribute('d', 'M ' + x + ' ' + y);
   return path;
 }
 
@@ -157,7 +163,7 @@ function createPlaceholder(x, y, svg) {
     iletter.setAttribute('annotation-type', '3');
     iletter.setAttribute('stroke', 'white');
     iletter.setAttribute('stroke-width', 0.5);
-    iletter.setAttribute('d', 'M3 0c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm-1.5 2.5c-.83 0-1.5.67-1.5 1.5h1c0-.28.22-.5.5-.5s.5.22.5.5-1 1.64-1 2.5c0 .86.67 1.5 1.5 1.5s1.5-.67 1.5-1.5h-1c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-.36 1-1.84 1-2.5 0-.81-.67-1.5-1.5-1.5z');
+    iletter.setAttribute('d', 'M 3 0c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm-1.5 2.5c-.83 0-1.5.67-1.5 1.5h1c0-.28.22-.5.5-.5s.5.22.5.5-1 1.64-1 2.5c0 .86.67 1.5 1.5 1.5s1.5-.67 1.5-1.5h-1c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-.36 1-1.84 1-2.5 0-.81-.67-1.5-1.5-1.5z');
     iletter.setAttribute('opacity', '0.7');
     iletter.setAttribute('transform', 'scale('+1/3/viewer.viewport.getZoom()+') translate('+x+','+y+')');
     iletter.setAttribute('cursor', 'pointer')
@@ -186,7 +192,7 @@ function createPlaceholder(x, y, svg) {
     var els = $([circle, circle2, iletter]);
     els.on('mouseenter', annoMouseEnter);
     els.on('mouseleave', annoMouseLeave);
-    els.on('mousedown', function(e) { 
+    els.on('click', function(e) { 
       var newnote = prompt("Specify note for this location, leave it empty to remove the note", circle2.getAttribute('note'));
       if (newnote !== null) //user cancelled prompt
         circle2.setAttribute('note', newnote); 
